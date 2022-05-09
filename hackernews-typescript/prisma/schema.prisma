@@ -1,0 +1,30 @@
+// 1. 데이터 소스 - SQLite 파일에 대한 경로, 데이터베이스 연결에 SQLite 를 사용할 것임을 Prisma에게 알림
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// 2. 제너레이터 - Prisma Client를 생성하고자 함을 나타냄
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 3. 데이터모델 - Prisma가 잠시 후에 생성할 데이터베이스 테이블 Link의 구조를 정의
+model Link {
+  id          Int      @id @default(autoincrement()) // 4. 기본키, 레코드 생성 시 명시적 값이 지정되지 않는경우 필드가 생성됨
+  createdAt   DateTime @default(now()) // 5. 필드가 수동으로 지정되지 않은 경우 기본값도 지정.
+  description String
+  url         String
+  postedBy    User?    @relation(name: "PostedBy", fields: [postedById], references: [id])
+  postedById  Int?
+  voters      User[]   @relation(name: "Votes")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  password String
+  links    Link[] @relation(name: "PostedBy")
+  votes    Link[] @relation(name: "Votes")
+}
